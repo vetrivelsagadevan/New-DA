@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4F46E5">
+    <meta name="description" content="Track your Data Analyst learning progress with Alex The Analyst">
+    <link rel="manifest" href="manifest.json">
+    <title>Data Analyst Learning Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            color: #4F46E5;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .progress-overview {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            gap: 10px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .month-section {
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .month-header {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .month-header:hover {
+            background: linear-gradient(135deg, #4338CA 0%, #6D28D9 100%);
+        }
+
+        .month-progress {
+            font-size: 14px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+
+        .lessons-container {
+            padding: 20px;
+            display: none;
+        }
+
+        .lessons-container.active {
+            display: block;
+        }
+
+        .lesson-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #E5E7EB;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .lesson-item:hover {
+            background: #F9FAFB;
+        }
+
+        .lesson-item:last-child {
+            border-bottom: none;
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            border: 2px solid #D1D5DB;
+            border-radius: 6px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .lesson-item.completed .checkbox {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            border-color: #10B981;
+        }
+
+        .checkbox::after {
+            content: "✓";
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .lesson-item.completed .checkbox::after {
+            opacity: 1;
+        }
+
+        .lesson-content {
+            flex: 1;
+        }
+
+        .lesson-title {
+            font-weight: 500;
+            color: #1F2937;
+            margin-bottom: 5px;
+        }
+
+        .lesson-item.completed .lesson-title {
+            color: #6B7280;
+        }
+
+        .lesson-duration {
+            font-size: 12px;
+            color: #6B7280;
+        }
+
+        .youtube-link {
+            background: #FF0000;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+
+        .youtube-link:hover {
+            background: #CC0000;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        }
+
+        .nav-button {
+            background: none;
+            border: none;
+            color: #6B7280;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            padding: 5px 15px;
+        }
+
+        .nav-button.active {
+            color: #4F46E5;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .reset-button {
+            background: #EF4444;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .reset-button:hover {
+            background: #DC2626;
+        }
+
+        .install-prompt {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .install-prompt.show {
+            display: flex;
+        }
+
+        .install-button {
+            background: white;
+            color: #059669;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            display: none;
+            z-index: 1000;
+        }
+
+        .celebration.show {
+            display: block;
+            animation: popIn 0.5s ease-out;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .celebration-emoji {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .celebration h2 {
+            color: #4F46E5;
+            margin-bottom: 10px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 999;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+                padding-bottom: 80px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .stat-card .number {
+                font-size: 22px;
+            }
+
+            .youtube-link {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="install-prompt" id="installPrompt">
+            <span>📱 Install this app on your phone for easy access!</span>
+            <button class="install-button" id="installButton">Install</button>
+        </div>
+
+        <div class="header">
+            <h1>🎯 Data Analyst Learning Tracker</h1>
+            <p style="color: #6B7280; font-size: 14px; margin-top: 5px;">Alex The Analyst - Complete Bootcamp</p>
+            <div class="progress-overview">
+                <div class="stat-card">
+                    <div class="number" id="completedCount">0</div>
+                    <div class="label">COMPLETED</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="totalCount">0</div>
+                    <div class="label">TOTAL LESSONS</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="progressPercent">0%</div>
+                    <div class="label">PROGRESS</div>
+                </div>
+            </div>
+            <button class="reset-button" onclick="resetProgress()">🔄 Reset All Progress</button>
+        </div>
+
+        <div id="monthsContainer"></div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="celebration" id="celebration">
+        <div class="celebration-emoji">🎉</div>
+        <h2>Congratulations!</h2>
+        <p id="celebrationText"></p>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-button active">
+            <span class="nav-icon">📚</span>
+            <span>Courses</span>
+        </button>
+        <button class="nav-button" onclick="window.open('https://www.youtube.com/@AlexTheAnalyst', '_blank')">
+            <span class="nav-icon">▶️</span>
+            <span>YouTube</span>
+        </button>
+        <button class="nav-button" onclick="showStats()">
+            <span class="nav-icon">📊</span>
+            <span>Stats</span>
+        </button>
+    </div>
+
+    <script>
+        // Complete course data
+        const courseData = [
+            {
+                month: "MONTH 1: SQL Foundation",
+                lessons: [
+                    { title: "Data Analyst Roadmap 2024", duration: "20 min", url: "https://www.youtube.com/watch?v=mKwIceOIfn0" },
+                    { title: "SQL Tutorial 1 - Introduction to SQL", duration: "30 min", url: "https://www.youtube.com/watch?v=RSlqWnP-Dy8" },
+                    { title: "SQL Tutorial 2 - SELECT Statement", duration: "25 min", url: "https://www.youtube.com/watch?v=RSlqWnP-Dy8" },
+                    { title: "SQL Tutorial 3 - WHERE Clause", duration: "30 min", url: "https://www.youtube.com/watch?v=RSlqWnP-Dy8" },
+                    { title: "SQL Tutorial 4 - GROUP BY & ORDER BY", duration: "35 min", url: "https://www.youtube.com/watch?v=RSlqWnP-Dy8" },
+                    { title: "SQL Tutorial 5 - JOINs Explained", duration: "40 min", url: "https://www.youtube.com/watch?v=RSlqWnP-Dy8" },
+                    { title: "SQL Tutorial 6 - CASE Statements", duration: "30 min", url: "https://www.youtube.com/watch?v=RSlqWnP-Dy8" },
+                    { title: "SQL Tutorial 7 - Subqueries", duration: "35 min", url: "https://www.youtube.com/watch?v=RSlqWnP-Dy8" },
+                    { title: "SQL Tutorial 8 - Window Functions", duration: "45 min", url: "https://www.youtube.com/watch?v=RSlqWnP-Dy8" },
+                    { title: "Practice: HackerRank SQL (30 problems)", duration: "Self-paced", url: "https://www.hackerrank.com/domains/sql" }
+                ]
+            },
+            {
+                month: "MONTH 2: Excel & Advanced SQL",
+                lessons: [
+                    { title: "Excel Tutorial 1 - Introduction", duration: "25 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Excel Tutorial 2 - Formulas & Functions", duration: "30 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Excel Tutorial 3 - Pivot Tables", duration: "35 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Excel Tutorial 4 - VLOOKUP & XLOOKUP", duration: "30 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Excel Tutorial 5 - Data Cleaning", duration: "40 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Excel Project - Build Dashboard", duration: "60 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Advanced SQL - CTEs", duration: "30 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Advanced SQL - Temp Tables", duration: "30 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Practice: HackerRank SQL (20 problems)", duration: "Self-paced", url: "https://www.hackerrank.com/domains/sql" },
+                    { title: "Build Excel Project 1", duration: "Self-paced", url: "" }
+                ]
+            },
+            {
+                month: "MONTH 3: Tableau & Python Basics",
+                lessons: [
+                    { title: "Tableau Tutorial 1 - Introduction", duration: "30 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Tableau Tutorial 2 - Connecting Data", duration: "25 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Tableau Tutorial 3 - Building Visualizations", duration: "40 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Tableau Tutorial 4 - Dashboard Creation", duration: "45 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Tableau Tutorial 5 - Advanced Features", duration: "35 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Python Tutorial 1 - Introduction", duration: "30 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Python Tutorial 2 - Pandas Basics", duration: "40 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Python Tutorial 3 - Data Cleaning", duration: "45 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Build Tableau Dashboard 1", duration: "Self-paced", url: "" },
+                    { title: "Publish on Tableau Public", duration: "Self-paced", url: "https://public.tableau.com" }
+                ]
+            },
+            {
+                month: "MONTH 4: Python for Data Analysis",
+                lessons: [
+                    { title: "Python Tutorial 4 - Data Manipulation", duration: "40 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Python Tutorial 5 - Data Analysis", duration: "45 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Python Tutorial 6 - Visualization", duration: "40 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Python Tutorial 7 - Working with APIs", duration: "35 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Portfolio Project 1 - COVID Data Exploration", duration: "90 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Portfolio Project 2 - Data Cleaning in SQL", duration: "75 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Create GitHub Account", duration: "20 min", url: "https://github.com" },
+                    { title: "Upload Projects to GitHub", duration: "30 min", url: "" },
+                    { title: "Practice: Kaggle Python", duration: "Self-paced", url: "https://www.kaggle.com/learn" }
+                ]
+            },
+            {
+                month: "MONTH 5: Portfolio Projects",
+                lessons: [
+                    { title: "Portfolio Project 3 - Tableau Viz", duration: "80 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Portfolio Project 4 - Python Pandas", duration: "85 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Portfolio Project 5 - Power BI Project", duration: "70 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Build Custom Project 1 (Work Data)", duration: "Self-paced", url: "" },
+                    { title: "Build Custom Project 2", duration: "Self-paced", url: "" },
+                    { title: "Write Case Study for Each Project", duration: "Self-paced", url: "" },
+                    { title: "Create Portfolio Website", duration: "120 min", url: "" },
+                    { title: "Polish LinkedIn Profile", duration: "60 min", url: "https://linkedin.com" },
+                    { title: "Optimize GitHub Profile", duration: "30 min", url: "" }
+                ]
+            },
+            {
+                month: "MONTH 6: Interview Prep & Job Search",
+                lessons: [
+                    { title: "SQL Interview Questions Part 1", duration: "30 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "SQL Interview Questions Part 2", duration: "35 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "SQL Interview Questions Part 3", duration: "40 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Data Analyst Interview Tips", duration: "25 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Resume Building Guide", duration: "30 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "How to Apply for Jobs", duration: "20 min", url: "https://www.youtube.com/@AlexTheAnalyst" },
+                    { title: "Practice: LeetCode SQL (50 problems)", duration: "Self-paced", url: "https://leetcode.com/problemset/database" },
+                    { title: "Prepare Resume with Projects", duration: "Self-paced", url: "" },
+                    { title: "Apply to 10 Jobs", duration: "Self-paced", url: "" },
+                    { title: "Practice Mock Interviews", duration: "Self-paced", url: "" }
+                ]
+            }
+        ];
+
+        let deferredPrompt;
+        let progress = JSON.parse(localStorage.getItem('daProgress')) || {};
+
+        // PWA Install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installPrompt').classList.add('show');
+        });
+
+        document.getElementById('installButton').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                document.getElementById('installPrompt').classList.remove('show');
+            }
+        });
+
+        // Initialize app
+        function init() {
+            renderMonths();
+            updateStats();
+        }
+
+        function renderMonths() {
+            const container = document.getElementById('monthsContainer');
+            container.innerHTML = '';
+
+            courseData.forEach((month, monthIndex) => {
+                const monthDiv = document.createElement('div');
+                monthDiv.className = 'month-section';
+
+                const completed = month.lessons.filter((_, i) => progress[`${monthIndex}-${i}`]).length;
+                const total = month.lessons.length;
+                const percentage = Math.round((completed / total) * 100);
+
+                monthDiv.innerHTML = `
+                    <div class="month-header" onclick="toggleMonth(${monthIndex})">
+                        <span>${month.month}</span>
+                        <span class="month-progress">${completed}/${total} (${percentage}%)</span>
+                    </div>
+                    <div class="lessons-container" id="month-${monthIndex}">
+                        ${month.lessons.map((lesson, lessonIndex) => `
+                            <div class="lesson-item ${progress[`${monthIndex}-${lessonIndex}`] ? 'completed' : ''}" 
+                                 onclick="toggleLesson(${monthIndex}, ${lessonIndex})">
+                                <div class="checkbox"></div>
+                                <div class="lesson-content">
+                                    <div class="lesson-title">${lesson.title}</div>
+                                    <div class="lesson-duration">⏱️ ${lesson.duration}</div>
+                                </div>
+                                ${lesson.url ? `<a href="${lesson.url}" target="_blank" class="youtube-link" onclick="event.stopPropagation()">▶️ Watch</a>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                container.appendChild(monthDiv);
+            });
+        }
+
+        function toggleMonth(monthIndex) {
+            const container = document.getElementById(`month-${monthIndex}`);
+            container.classList.toggle('active');
+        }
+
+        function toggleLesson(monthIndex, lessonIndex) {
+            const key = `${monthIndex}-${lessonIndex}`;
+            progress[key] = !progress[key];
+            localStorage.setItem('daProgress', JSON.stringify(progress));
+            
+            renderMonths();
+            updateStats();
+
+            if (progress[key]) {
+                checkMilestones(monthIndex, lessonIndex);
+            }
+        }
+
+        function updateStats() {
+            const total = courseData.reduce((sum, month) => sum + month.lessons.length, 0);
+            const completed = Object.values(progress).filter(Boolean).length;
+            const percentage = Math.round((completed / total) * 100);
+
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('progressPercent').textContent = percentage + '%';
+        }
+
+        function checkMilestones(monthIndex, lessonIndex) {
+            const monthCompleted = courseData[monthIndex].lessons.every((_, i) => 
+                progress[`${monthIndex}-${i}`]
+            );
+
+            if (monthCompleted) {
+                showCelebration(`Month ${monthIndex + 1} Complete! 🎉`);
+            }
+
+            const allCompleted = courseData.every((month, mIdx) =>
+                month.lessons.every((_, lIdx) => progress[`${mIdx}-${lIdx}`])
+            );
+
+            if (allCompleted) {
+                setTimeout(() => {
+                    showCelebration('🏆 YOU DID IT! Complete Bootcamp Finished! You\'re Job Ready! 🚀');
+                }, 1000);
+            }
+        }
+
+        function showCelebration(text) {
+            const celebration = document.getElementById('celebration');
+            const overlay = document.getElementById('overlay');
+            document.getElementById('celebrationText').textContent = text;
+            
+            celebration.classList.add('show');
+            overlay.classList.add('show');
+
+            setTimeout(() => {
+                celebration.classList.remove('show');
+                overlay.classList.remove('show');
+            }, 3000);
+        }
+
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+                progress = {};
+                localStorage.setItem('daProgress', JSON.stringify(progress));
+                renderMonths();
+                updateStats();
+            }
+        }
+
+        function showStats() {
+            const total = courseData.reduce((sum, month) => sum + month.lessons.length, 0);
+            const completed = Object.values(progress).filter(Boolean).length;
+            const percentage = Math.round((completed / total) * 100);
+            
+            alert(`📊 Your Stats:\n\n✅ Completed: ${completed}/${total} lessons\n📈 Progress: ${percentage}%\n\nKeep going! You're doing great! 💪`);
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
